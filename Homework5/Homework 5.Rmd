@@ -1,0 +1,328 @@
+---
+title: "Stats 20, 21F -- Homework 5"
+author: "TAKAO OBA -- 205615894"
+date: "`r format(Sys.Date(), '%D')`"
+output:
+  html_document:
+    toc: yes            # creates table of contents
+    toc_depth: 4        # toc will include headers <= ####
+    toc_float: yes      # toc always on left of page
+    code_folding: show  # allows hiding of code
+---
+
+## Question 1
+
+```{r}
+char <- c("2", "1", "0")
+num <- 0:2
+charnum <- data.frame(char, num, stringsAsFactors = TRUE)
+
+```
+
+### (a)
+
+```{r}
+as.numeric(char)
+as.numeric(charnum$char)
+charnum2 <- data.frame(char, num, stringsAsFactors = FALSE)
+as.numeric(charnum2$char)
+```
+
+When as.numeric is applied to "char" the result is 2 1 0 and when it is applied to `charnum$char` the result is 3 2 1 . This is because of the optional argument stringsAsFactors being set to TRUE. This makes the char in the charnum data frame treated as factors instead of strings. Thus, if the stringsAsFactors is set to FALSE, the output for as.numeric(`charnum$char`) will be the same as as.numeric(char) because the values in the data frame is still stored as characters or strings. 
+
+### (b)
+
+```{r}
+as.numeric(as.character(charnum$char))
+as.numeric(char)
+```
+
+## Question 2
+
+```{r}
+simple_list <- list("vector" = 1:10, "matrix" = matrix(6:1, nrow = 3, ncol = 2))
+```
+
+### (a)
+
+This method cannot be used to add a named component to simple_list that contains the NULL object because for R to be able to imput the NULL value into the list, there must already be an object that's name is NULL within the list. However, in this list, there is only the "vector" and "matrix" and "NULL" is not an option for R to store the NULL value. This will work if initially, NULL was created and named when creating the list "simple_list".
+
+### (b)
+
+```{r}
+simple_list <- c(simple_list, list(NULL))
+simple_list
+length(simple_list) == 3
+```
+
+### (c)
+
+```{r}
+simple_list$vector <- NULL
+simple_list <- c(list(NULL), simple_list)
+simple_list
+```
+
+## Question 3
+
+```{r}
+my_scale <- function(x){
+  if(attributes(x) == 2){
+    a <- min(attributes(x)[[1]], attributes(x)[[2]])
+    b <- max(attributes(x)[[1]], attributes(x)[[2]])
+    out <- numeric(0)
+    
+    num <- (x - min(x)) * (b - a)
+    den <- max(x) - min(x)
+    out <- a + (num / den)
+  }else{
+    num <- (x - min(x))
+    den <- max(x) - min(x)
+    out <- num / den
+  }
+  out
+}
+
+# vec <- c(1, 2, 3, 4, 9)
+# attributes(vec) <- list(a = 2, b = 3)
+# attributes(vec)
+# length(attributes(vec))
+# attributes(vec)[[1]]
+
+```
+
+## Question 4
+
+### (a)
+
+Suppose x is a vector full of strings/characters, numeric values, and logical values. Create a function "perfect_arrange" that inputs this vector x and outputs a vector that orders the values from smallest to largest value and also according to the logical hierarchy. For example, if x is a vector "apples 2 TRUE 15 bananas FALSE" the output should be "apples bananas 2 15 FALSE TRUE". 
+
+```{r}
+perfect_arrange <- function(x){
+  num <- as.numeric(x)
+  log <- as.logical(x)
+  erasevec <- numeric(0)
+  for(i in seq_len(length(x))){
+    if(((is.na(num[i])) & (is.na(log[i]))) == FALSE){
+      erasevec <- c(erasevec, i)
+    }
+  }
+  # print(erasevec)
+  x <- x[-erasevec]
+  c(sort(x), sort(num), sort(log) )
+  
+}
+
+vec <- c("apples", 2, TRUE, 15, "bananas", 3, FALSE)
+perfect_arrange(vec)
+# vec
+# 
+# as.logical("logical")
+# as.numeric(vec)
+# as.logical(vec)
+# vec2 <- c(2, 15, TRUE, FALSE)
+# perfect_arrange(vec2)
+```
+
+### (b)
+
+Create a function %m% that computes the matrix multiplication of matrix A and matrix B without using the %*% operator. 
+
+Error Code:
+%m% <- function(A, B){
+  row1 <- dim(A)[1]
+  row2 <- dim(B)[2]
+  C <- matrix(0, nrow = dim(A)[1], ncol = dim(A)[2])
+  
+  if(dim(A)[2] != dim(B)[1]){
+    message("Matrix Multiplication cannot be applied to these two vectors!")
+    
+  }else{
+    for(i in seq_len(dim(A)[1])){
+      asvectorA <- A[i]
+      
+      for(j in seq_len(dim(B)[2])){
+        
+        asvectorB <- B[, j]
+        C[i, j] <- sum(asvectorA * asvectorB)
+        
+      }
+    }
+  }
+  C
+}
+
+Fixed Code: 
+`%m%` <- function(A, B){
+  row1 <- dim(A)[1]
+  row2 <- dim(B)[2]
+  C <- matrix(0, nrow = dim(A)[1], ncol = dim(A)[2])
+  
+  if(dim(A)[2] != dim(B)[1]){
+    message("Matrix Multiplication cannot be applied to these two vectors!")
+    
+  }else{
+    for(i in seq_len(dim(A)[1])){
+      asvectorA <- A[i, ]
+      
+      for(j in seq_len(dim(B)[2])){
+        
+        asvectorB <- B[, j]
+        C[i, j] <- sum(asvectorA * asvectorB)
+        
+      }
+    }
+    C
+  }
+}
+
+
+Error 1. The function name is not placed in back ticks. If we do not use back ticks, R will think that this is simply a function name and since function names cannot start or include special characters, this will be an error. This would correctly be written as `%m%`. 
+
+Error 2. The line after the for loop asvectorA <- A[i] is incorrectly using indexing. Since A is a matrix, we want to specify whether the value we want to index is applied to the row or the column. To do this, we must use a comma before or after the i. Since in this case, we want to look at the rows, the correct operation will be asvectorA <- A[i, ].
+
+Error 3. The output C is placed in an incorrect location. If we output the results as the code is written, the infix operator function will output C for any condition. In our case, we want to make sure that R outputs C only when matrix multiplication can actually be applied, in other words, within the else function. If it cannot be applied meaning the dimensions of the two vectors are not applicable for multiplication, there is no meaning for C to be outputted. 
+
+### (c)
+
+Question 1: What is the correct way to extract the element "apple" from the following list:
+
+L <- list(
+  "vector" = 1:10,
+  "matrix" = matrix(1:6, 2, 3),
+  "string" = "I like grapes and oranges!",
+  "list" = list(1:5, matrix(c("banana", "apple", "raspberry", "strawberry"), nrow = 2))
+)
+a) L[[4]][[2]][2,1] #correct answer
+b) L[[4]][2][2,1]
+c) L[[4]][[2]][1,2]
+d) L[[4]][2][1,2]
+e) L[[4]][[2]][[2,1]]
+
+```{r}
+L <- list(
+  "vector" = 1:10,
+  "matrix" = matrix(1:6, 2, 3),
+  "string" = "I like grapes and oranges!",
+  "list" = list(1:5, matrix(c("banana", "apple", "raspberry", "strawberry"), nrow = 2)))
+L
+L[[4]][[2]][2,1]
+```
+
+Question 2: Suppose x is a vector with the values: 1, 2, 3, 4, 5. Which of the following will the variable x NOT output as 1, 4, 9, 16, 25?
+a) for(i in 1:length(x)){
+  x[i] <- (x[i])^2
+} 
+b) for(i in seq_len(1:5)){
+  x[i] <- (x[i])^2
+}                                     # THIS IS THE CORRECT ANSWER
+c) for(i in seq_along(5)){ 
+  x[i] <- (x[i])^2
+}
+d)for(i in 1:5){
+  x[i] <- (x[i])^2
+}
+e) for(i in x){
+  x[i] <- (x[i])^2
+}
+
+
+## Question 5
+
+### (a)
+
+```{r}
+my_unlist  <- function(x){
+  out <- x[[1]]
+
+  
+  for(i in seq_len(length(x) - 1)){
+      out <- c(out, x[[i + 1]])
+  }
+  
+  out
+}
+
+# L1 <- list(c(2, 1, 1), c(3, 2, 1), 2)
+# L2 <- list(as.character(factor(c("a", "a", "b", "c"))), factor(c("b", "c", "e")), as.character(factor(c(10, 5, 49))))
+# 
+# levels(factor(c("a", "a", "b", "c")))
+
+my_unlist(list(c(2, 1, 1), c(3, 2, 1), 2))
+my_unlist(list(factor(c("a", "a", "b", "c")), factor(c("b", "c", "e")), factor(c("a", "d", "b"))))
+my_unlist(list(factor(c("a", "b")), c(1, 2)))
+my_unlist(list(factor(c("a", "b")), factor(c("b", "c")), c("a", "b")))
+```
+
+### (b)
+
+```{r}
+stat_mode <- function(x, first = FALSE){
+  out <- which(table(my_unlist(x)) == max(table(my_unlist(x))))
+  
+  # unlistx <- my_unlist(x)
+ #  
+ #  for(i in seq_len(length(unlistx))){
+ #    which(unlistx)
+  
+  if(first == TRUE){
+    out <- out[1]
+  }
+  
+  out
+}
+
+stat_mode(c(FALSE, FALSE, TRUE, TRUE, FALSE))
+stat_mode(list(c(2, 1, 1), c(3, 2, 1), 2))
+stat_mode(list(c(2, 1, 1), c(3, 2, 1), 2), first = TRUE)
+```
+
+### (c)
+
+```{r}
+df_summary <- function(x){
+  class <- numeric(0)
+  min <- numeric(0)
+  mean <- numeric(0)
+  max <- numeric(0)
+  na_count <- numeric(0)
+  
+  for(i in seq_len(ncol(x))){
+    class[i] <- class(x[, i])
+  }
+  
+  for(i in seq_len(ncol(x))){
+    min[i] <- min(x[, i])
+  }
+  
+  for(i in seq_len(ncol(x))){
+    mean[i] <- mean(x[, i])
+  }
+  
+  for(i in seq_len(ncol(x))){
+    max[i] <- max(x[, i])
+  }
+  
+  for(i in seq_len(ncol(x))){
+    na_count <- na_count + sum(as.numeric(which(is.na(x[, i]))))
+  }
+  
+  out <- list("n_obs" = dim(x)[1] * dim(x)[2], "n_var" = length(x), "var_names" = colnames(x), list("class" = class, "min" = min, "mean" = mean, "max" = max, "na_count" = na_count))
+}
+
+```
+
+### (d)
+
+```{r}
+# load(starwars.RData)
+ # df_summary(starwars)
+```
+
+### (e)
+```{r}
+# Using only the output object from (d), find the most common starships that the characters in the starwars data have piloted. Do not refer to the original starwars data.
+```
+
+## Question 6
+

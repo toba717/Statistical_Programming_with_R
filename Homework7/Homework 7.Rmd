@@ -1,0 +1,145 @@
+---
+title: "Stats 20, 21F -- Homework 7"
+author: "TAKAO OBA -- 205615894"
+date: "`r format(Sys.Date(), '%D')`"
+output:
+  html_document:
+    toc: yes            # creates table of contents
+    toc_depth: 4        # toc will include headers <= ####
+    toc_float: yes      # toc always on left of page
+    code_folding: show  # allows hiding of code
+---
+
+## Question 1
+
+### (a)
+
+```{r}
+births <- read.csv("births.csv")
+head(births)
+class(births)
+```
+### (b)
+
+```{r}
+which(!((births$Habit == "NonSmoker") | (births$Habit == "Smoker")))
+
+length(which(!((births$Habit == "NonSmoker") | (births$Habit == "Smoker"))))
+
+births$Habit[41]
+births$Habit[577]
+births$Habit[684]
+births$Habit[984]
+births$Habit[1292]
+births$Habit[1501]
+```
+
+### (c)
+
+```{r}
+habittable <- table(births$Habit)
+barplot(habittable, xlab = "Category", ylab = "Frequency", col = 999)
+```
+
+### (d)
+
+```{r}
+# newbirths <- droplevels(births$Habit)
+# levels(births$Habit)
+```
+
+### (e)
+
+```{r}
+#boxplot(births$Weight)
+```
+
+## Question 2
+
+```{r}
+with(births, hist(weight[Habit == "Smoker"], prob = TRUE, density = 50, col = "green", xlab = "Weight (in ounces)", main = "Histogram of Weight by\ntheir Mother's Smoking Habit", xlim = range(weight)))
+
+with(births, hist(weight[Habit == "NonSmoker"], prob = TRUE, density = 40, col = "red", add = TRUE))
+head(births)
+
+with(births, lines(density(weight[Habit == "Smoker"]), lwd = 3, col = "green"))
+
+with(births, lines(density(weight[Habit == "NonSmoker"]), lwd = 3, col = "red"))
+
+with(births, abline(v = summary(weight[Habit == "Smoker"])[3], lty = 2, lwd = 3, col = "green"))
+
+with(births, abline(v = summary(weight[Habit == "NonSmoker"])[3], lty = 2, lwd = 3, col = "red"))
+
+legend("topleft", c("Smoker", "Nonsmoker", "Density Estimate of Smoker", "Density Estimate of Nonsmoker", "Median of Smoker", "Median of Nonsmoker"), density = c(50, 40, NA, NA, NA, NA), fill = c("green", "red", 0, 0, 0, 0), border = c(1, 1, NA, NA, NA, NA), lty = c(NA, NA, 1, 1, 2, 2), lwd = c(NA, NA, 3, 3, 2, 2), col = c(NA, NA, "red", "green", "red", "green"), inset = 0.01)
+
+
+```
+
+## Question 3
+
+### (a)
+
+```{r}
+library(ggplot2)
+
+pairs(diamonds[-c(2, 3, 4, 8, 9, 10)], upper.panel = NULL, cex = 0.1)
+
+```
+
+The variables carat and price seem to have the strongest relationship. The relationship appears to be nonlinear.
+
+### (b)
+
+```{r}
+sd(diamonds$carat)
+sd(diamonds$price)
+
+plot(diamonds$price ~ diamonds$carat, pch = 2, cex = 0.3, col = diamonds$clarity, xlab = "Carat", ylab = "Price", main = "Relationship between\nCarat and Price of Diamonds")
+legend("topright", c("I1", "SI2", "SI1", "VS2", "VS1", "VVS2", "VVS1", "IF"), pch = 2, cex = 1, col = c(1, 2, 3, 4, 5, 6, 7, 8))
+head(diamonds)
+class(diamonds$clarity)
+levels(diamonds$clarity)
+head(diamonds$clarity)
+```
+
+The class of the clarity column is "ordered" "factors" and thus the default colors of 1 to 8 were chosen because these are the numbers that are generated when the factors are coerced into numeric values using the as.numeric function. 
+
+### (c)
+
+```{r}
+plot(diamonds$price ~ diamonds$carat, pch = 2, cex = 0.3, col = as.integer(diamonds$clarity)[c(1, 2, 3, 4, 5, 6, 7, 8)], xlab = "Carat", ylab = "Price", main = "Relationship between\nCarat and Price of Diamonds")
+legend("topright", c("I1", "SI2", "SI1", "VS2", "VS1", "VVS2", "VVS1", "IF"), pch = 2, cex = 1, col = as.integer(diamonds$clarity)[c(1, 2, 3, 4, 5, 6, 7, 8)])
+
+```
+
+
+### (d)
+From the scatter plot, we can see how there is clearly a relationship between the clarity, carat, and the price of the diamond. Typically, as the carat is greater, the price is higher for the diamond, and certain clarities of the diamond generally has a higher price compared to other clarities. Additionally, certain clarities are only seen in the lower carats, which indicates that these rare clarities are extremely hard to find in higher carats or bigger diamonds.
+
+
+## Question 4
+
+### (a)
+
+```{r}
+mean_color_cut <- tapply(diamonds$price, list(diamonds$color, diamonds$cut), mean)
+mean_color_cut
+```
+
+### (b)
+
+```{r}
+matplot(mean_color_cut, xaxt = "n", ylab = "Mean Price", lty = 1, lwd = 2, pch = 1)
+
+levels(diamonds$cut)
+levels(diamonds$color)
+axis(1, at = 1:7, labels = levels(diamonds$color))
+legend("topleft", c("Fair", "Good", "Very Good", "Premium", "Ideal"), col = c(1, 2, 3, 4, 5), pch = 1, lwd = 2)
+?matplot
+```
+
+
+### (c)
+
+Yes, there seems to be a relationship between the different levels of the color and the mean price of diamonds and the different levels of cut and the mean price of the diamonds. We can see from the line plot that mean price increases as we move along right of the x axis. Additionally, if we look at the certain points in different lines, we notice that the well cut diamonds tend to have a higher mean price.
+

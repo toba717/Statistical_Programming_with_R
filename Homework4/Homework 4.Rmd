@@ -1,0 +1,393 @@
+---
+title: "Stats 20, 21F -- Homework 4"
+author: "TAKAO OBA -- 205615894"
+date: "`r format(Sys.Date(), '%D')`"
+output:
+  html_document:
+    toc: yes            # creates table of contents
+    toc_depth: 4        # toc will include headers <= ####
+    toc_float: yes      # toc always on left of page
+    code_folding: show  # allows hiding of code
+---
+
+
+## Question 1
+
+```{r}
+my_t <- function(X){
+  longvector <- numeric(0)
+  if(!is.matrix(X)){
+    dim(X) <- c(1, length(X))
+    X
+  }else{
+    for(i in seq_len(dim(X)[2])){
+      asvector <- X[, i]
+      longvector <- c(longvector, asvector)
+    }
+    Y <- matrix(longvector, nrow = dim(X)[2], byrow = TRUE)
+    Y
+  }
+}
+t(c(1, 2, 3, 4))
+my_t(c(1, 2, 3, 4))
+
+A <- matrix(1:6, nrow = 2)
+A
+t(A)
+my_t(A)
+
+B <- matrix(1:10, nrow = 5)
+B
+t(B)
+my_t(B)
+```
+
+
+## Question 2
+
+### (a)
+
+```{r}
+my_cor <- function(x, y, use){
+  if(use == "pairwise.complete.obs"){
+    for(i in length(x)){
+      if(is.na(x[i]) | is.na(y[i])){
+        x <- x[-i]
+        y <- y[-i]
+      }
+    }
+  }
+    num <- sum((x - mean(x)) * (y - mean(y)))
+    den1 <- sqrt(sum((x - mean(x))^2))
+    den2 <- sqrt(sum((y - mean(y))^2))
+    r <- num / (den1 * den2)
+    r
+  
+}
+
+
+
+
+```
+
+### (b)
+
+```{r}
+linreg <- function(x, y, use){
+  if(use == "pairwise.complete.obs"){
+    for(i in length(x)){
+      if(is.na(x[i]) | is.na(y[i])){
+        x <- x[-i]
+        y <- y[-i]
+      }
+    }
+  }
+  
+    b <- (my_cor(x, y, use) * sd(y)) / sd(x)
+    a <- mean(y) - b * mean(x)
+    c(a, b)
+
+}
+```
+
+### (c)
+
+```{r}
+x <- c(61, 62, 63, 64, 66, 68)
+y <- c(104, 110, 125, 141, 160, 170)
+linreg(x, y, "everything")
+```
+
+### (d)
+
+```{r}
+linreg_mat <- function(x, y){
+  X <- cbind(1, x)
+  Xt <- my_t(X)
+  
+  if(dim(Xt)[2] != dim(X)[1]){
+    message("Vector arguments are not the same length!")
+  }else{
+    mat1 <- solve(Xt %*% X)
+    if(dim(mat1)[1] != dim(mat1)[2]){
+      message("The product of the transpose of X and the matrix X is not a square matrix!")
+    }else{
+      mat1 %*% Xt %*%y
+    }
+  }
+}
+```
+
+### (e)
+
+```{r}
+linreg_mat(x, y)
+```
+Answer from part c is `linreg(x, y, "everything")`.
+Answer from part e is `linreg_mat(x, y)`.
+
+### (f)
+The value -510.64706 is how much we expect the weight in pounds of the self-identified women to be when their height is 0 inches. 
+
+The value 10.08824 is how much we expect to see an increase in the weight of the self-identified women in pounds when there is one inch increase in their height. 
+
+## Question 3
+
+### (a)
+
+```{r}
+`%m%` <- function(A, B){
+  row1 <- dim(A)[1]
+  row2 <- dim(B)[2]
+  C <- matrix(0, nrow = dim(A)[1], ncol = dim(A)[2])
+  
+  if(dim(A)[2] != dim(B)[1]){
+    message("Matrix Multiplication cannot be applied to these two vectors!")
+    
+  }else{
+    for(i in seq_len(dim(A)[1])){
+      asvectorA <- A[i, ]
+      
+      for(j in seq_len(dim(B)[2])){
+        
+        asvectorB <- B[, j]
+        C[i, j] <- sum(asvectorA * asvectorB)
+        
+      }
+    }
+    C
+  }
+}
+
+```
+
+### (b)
+
+```{r}
+X <- matrix(c(6, 3, 5, 2, 4, 1), nrow = 2)
+Y <- matrix(c(1, 2, 3, 4, 5, 6, 7, 8, 9), nrow = 3)
+
+X %m% Y
+```
+
+
+## Question 4
+
+### (a)
+
+```{r}
+`%^%` <- function (A, k) {
+  
+  if (k == 0){
+    B <- diag(dim(A)[1])
+  }else if(k == 1){
+    B <- A
+  }
+  
+  i = 0
+  B <- diag(dim(A)[1])
+  while(i < k){
+    i <- i + 1
+    B <- B %m% A
+  }
+  B
+}
+```
+
+### (b)
+
+```{r}
+Z <- matrix(c(0.2, 0.6, 0.4, 0.7, 0.2, 0.1, 0.1, 0.2, 0.5), nrow = 3)
+Z
+Z %^% 0
+Z %^% 5
+Z %^% 50
+Z %^% 500
+```
+
+
+## Question 5
+
+```{r}
+my_which <- function(X, arr.ind = FALSE){
+  longvector <- as.vector(X)
+  vec <- numeric(0)
+  
+  for(i in seq_len(length(longvector))){
+    if(longvector[i] == TRUE){
+      vec <- c(vec, i)
+    }
+  }
+  
+  vec
+}
+
+
+
+Z <- matrix(c(TRUE,FALSE,TRUE,FALSE,TRUE,FALSE,TRUE,TRUE,FALSE), nrow = 3)
+
+
+my_which(Z)
+which(Z)
+
+# longvector <- as.vector(Z)
+# longvector
+# seq_len(longvector)
+# which(Z)
+# 
+# 
+# 
+# Z
+# which(Z)
+# as.vector(Z)
+
+
+```
+
+## Question 6
+
+```{r}
+setwd("~/Desktop")
+load("mlb.RData")
+
+```
+
+### (a)
+
+### (i)
+```{r}
+tapply(hit, team, max)
+```
+
+### (ii)
+```{r}
+tapply(team, team, length)
+table(team)
+```
+
+### (iii)
+```{r}
+tapply(hr, team, function(x){seq_along(which(x >= 1))[length(seq_along(which(x >= 1)))]})
+```
+
+### (b)
+
+### (i)
+```{r}
+tapply((hit / ab)[ab > 100], team[ab > 100],max)
+```
+
+### (ii)
+
+```{r}
+tapply((hit / ab)[ab > 100], team[ab > 100], mean)
+```
+
+### (c)
+
+```{r}
+tapply(hr, list(pos, league), mean)
+```
+
+Right field had the largest difference between the two leagues.
+
+### (d)
+
+```{r}
+# tapply(table(team, pos), table(team, pos), median)
+# tapply()
+# help(tapply)
+# table(team, pos) 
+table(pos) / length(levels(team))
+# length(levels(team))
+# table(team)
+tapply(team, list(team, pos), length)
+vapply(team, mean, numeric(1))
+```
+
+## Question 7 
+
+### (a)
+
+```{r}
+my_row <- function(X){
+  matrix(1:dim(X)[1], nrow = dim(X)[1], ncol = dim(X)[2])
+}
+
+X <- matrix(c(6, 3, 5, 2, 4, 1), nrow = 2)
+Y <- matrix(c(1, 2, 3, 4, 5, 6, 7, 8, 9), nrow = 3)
+row(X)
+my_row(X)
+row(Y)
+my_row(Y)
+```
+
+### (b)
+
+```{r}
+my_col <- function(X){
+  matrix(1:dim(X)[2], nrow = dim(X)[1], ncol = dim(X)[2], byrow = TRUE)
+}
+
+X <- matrix(c(6, 3, 5, 2, 4, 1), nrow = 2)
+Y <- matrix(c(1, 2, 3, 4, 5, 6, 7, 8, 9), nrow = 3)
+col(X)
+my_col(X)
+col(Y)
+my_col(Y)
+```
+
+### (c)
+```{r}
+my_diag <- function(X, nrow, ncol){
+  if(length(X) == 1){
+    diagmat <- matrix(0 ,nrow = X, ncol = X)
+    
+    for(i in seq_len(dim(diagmat)[1])){
+      diagmat[i,i] <- 1
+    }
+    
+  }else if(length(dim(X)) > 1){
+    diagmat <- numeric(0)
+    longvector <- as.vector(X)
+
+    for(i in seq_len(length(longvector))){
+      if((sqrt(i) %% 1) == 0){
+        diagmat <- c(diagmat, longvector[i])
+      }
+    }
+  }else if(length(X) > 1){
+    diagmat <- matrix(0, nrow = length(X), ncol = length(X))
+    
+    for(i in seq_len(length(X))){
+      diagmat[i,i] <- X[i]
+    }
+    
+  }
+  diagmat
+}
+
+X <- matrix(c(6, 3, 5, 2, 4, 1), nrow = 2)
+
+diag(5)
+my_diag(5)
+diag(c(1, 2, 3, 4, 5))
+my_diag(c(1, 2, 3, 4, 5))
+diag(X)
+my_diag(X)
+
+# length(dim(Y))
+# diag(Y)
+# mode(Y)
+# diag(c(1))
+# diag(X)
+# typeof(Y)
+# class(c(1))
+# class(1)
+# is.vector(5)
+# diag(5)
+# length(c(5, 2, 3, 4, 5))
+# is.integer(4)
+```
+
+

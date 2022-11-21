@@ -1,0 +1,235 @@
+---
+title: "Stats 20, 21F -- Homework 6"
+author: "TAKAO OBA -- 205615894"
+date: "`r format(Sys.Date(), '%D')`"
+output:
+  html_document:
+    toc: yes            # creates table of contents
+    toc_depth: 4        # toc will include headers <= ####
+    toc_float: yes      # toc always on left of page
+    code_folding: show  # allows hiding of code
+---
+
+## Question 1
+
+### (a)
+
+```{r}
+
+reading_ease <- function(passage){
+  sentences <- unlist(strsplit(passage, split = "[.!?:;]"))
+  totalsentences <- length(sentences)
+  
+  sentences <- tolower(sentences)
+  sentences <- gsub(pattern = "[[:punct:]]", replacement = "", sentences)
+  
+  allwords <- strsplit(sentences, split = " ")
+  keep_words <- function(words){
+    words[nchar(words) > 0]
+  }
+  allwords <- lapply(allwords, keep_words)
+  totalwords <- length(unlist(allwords))
+  
+  is_special_ending <- function(ending){
+    is_es <- all(ending == c("e", "s"))
+    is_ed <- all(ending == c("e", "d"))
+    is_e_not_le <- ending[2] == "e" & ending[1] != "l"
+    is_es | is_ed | is_e_not_le
+  }
+  
+  rm_special_endings <- function(word_letters){
+    word_tail <- tail(word_letters, n = 2)
+    if(is_special_ending(word_tail)){
+      if(word_tail[2] == "e"){
+        word_letters[-length(word_letters)]
+      }else{
+        head(word_letters, n = -2)
+      }
+    }else{
+      word_letters
+    }
+  }
+
+  is_vowel <- function(letter){
+    letter %in% c("a", "e", "i", "o", "u", "y")
+  }
+  
+  count_syllables <- function(word){
+    word_letters <- unlist(strsplit(word, split = ""))
+    if(length(word_letters) <= 3){
+      1
+    }
+    else{
+      word_letters <- rm_special_endings(word_letters)
+      word_vowels <- is_vowel(word_letters)
+      sum(word_vowels) - sum(diff(which(word_vowels)) == 1)
+    }
+  }
+  
+  syllablesvector <- numeric(totalwords)
+  for(i in 1:totalwords){
+    syllablesvector[i] <- count_syllables((unlist(allwords))[i])
+  }
+  
+  totalsyllables <- sum(syllablesvector)
+  
+  asl <- totalwords / totalsentences
+  asw <- totalsyllables / totalwords
+  print(asl)
+  print(asw)
+  
+  206.835 - 1.015 * asl - 84.6 * asw
+  
+  # totalsyllables <- numeric(totalwords)
+  # lengthword <- numeric(0)
+  # is_special_ending <- function(ending){
+  #   is_es <- all(ending == c("e", "s"))
+  #   is_ed <- all(ending == c("e", "d"))
+  #   is_e_not_le <- ending[2] == "e" & ending[1] != "l"
+  #   is_es | is_ed | is_e_not_le
+  # }
+  # is_vowel <- function(letter){
+  #   letter %in% c("a", "e", "i", "o", "u", "y")
+  # }
+  # 
+  # for(i in 1:totalwords){
+  #   lengthword <- unlist(strplit(totalwords[i], split = ""))
+  #   
+  #   if(lengthword < 3.5){
+  #     totalsyllables[i] <- 1
+  #   }else{
+  #     tailword <- tail(totalwords[i], n = 2)
+  #     rm_special_endings <- function(word_letters){
+  #       word_tail <- tail(word_letters, n = 2)
+  #       if(is_special_ending(word_tail)){
+  #         if(word_tail[2] == "e"){
+  #           word_letters[-length(word_letters)]
+  #         }else{
+  #           head(word_letters, n = -2)
+  #         }
+  #       }else{
+  #         word_letters
+  #       }
+  #     }
+  #     
+  #     removedwords <- rm_special_endings(totalwords[i])
+  #     
+  #     
+  #     
+  #   }
+  # }
+  
+}
+
+```
+
+### (b)
+
+```{r}
+source("waffles.R")
+reading_ease(waffles)
+waffles_vec <- c("We need to remember what's important in life: friends, waffles, work.", "Or waffles, friends, work.", "Doesn't matter, but work is third.")
+reading_ease(waffles_vec)
+```
+
+
+## Question 2
+
+```{r}
+my_nchar <- function(x){
+  out <- numeric(length(x))
+  for(i in 1:length(x)){
+    out[i] <- length(unlist(strsplit(x[i], split = "")))
+  }
+  out
+}
+
+y <- c("Pawnee rules", "Eagleton drools")
+nchar(y)
+my_nchar(y)
+```
+
+
+## Question 3
+
+```{r}
+my_strrep <- function(x, times){
+  out <- character(0)
+  for(i in 1:length(x)){
+    out <- rep(x[i], times[i])
+    print(paste(out, collapse = ""))
+  }
+}
+
+strrep(c("pineapples", "oranges"), c(6, 2))
+my_strrep(c("pineapples", "oranges"), c(6, 2))
+```
+
+## Question 4
+
+```{r}
+`%is_in%` <- function(x, table) {
+  out <- rep(FALSE, length(x))
+  
+  for(i in seq_len(length(x))){
+    if((sum(as.integer(x[i] == table))) > 0){
+      out[i] <- TRUE
+    }
+  }
+  
+  out
+}
+
+1:10 %in% c(5, 7, 9)
+1:10 %is_in% c(5, 7, 9)
+
+ucla <- c("u", "c", "l", "a")
+letters %in% ucla
+letters %is_in% ucla
+```
+
+
+## Question 5
+
+```{r}
+my_gregexpr <- function (pattern, text){
+  out <- numeric(length(text))
+  
+  for (i in seq_len(length(text))){
+    for(j in seq_len(nchar(text[i]))){
+      subword <- substr(text[i], start = j, stop = (j + nchar(pattern) - 1))
+      
+      
+      if(subword == pattern){
+        out[i] <- j
+      }
+      
+    }
+  }
+  
+  
+  out[-grep(pattern, text)] <- -1
+  as.list(out)
+  
+}
+
+# test <- c("April and", "Andy", "love", "Champion", "and",
+# "Lil'", "Sebastian")
+# num <- c("hundred")
+# grep(pattern = "dreds", num)
+# m <- 1:10
+# m[- grep(pattern = "an", test)]
+a <- c("I am Takao Oba", "I like apples", "I like pineapples", "I like bananas", "I like to grapple" )
+
+my_gregexpr("apple", a)
+gregexpr("apple", a)
+```
+
+
+## Question 6
+
+```{r}
+
+
+```
+
