@@ -1,0 +1,274 @@
+---
+title: "Stats 20, 21F -- Homework 2"
+author: "Takao Oba -- 205615894"
+date: "`r format(Sys.Date(), '%D')`"
+output: 
+  html_document:
+    toc: yes            # creates table of contents
+    toc_depth: 4        # toc will include headers <= ####
+    toc_float: yes      # toc always on left of page
+    code_folding: show  # allows hiding of code
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Question 1
+
+```{r Question 1 Background}
+mixed1 <- c(TRUE, FALSE, FALSE, TRUE, 4, 0, 3)
+mixed1
+mixed2 <- c(TRUE, FALSE, FALSE, TRUE, 4, 0, "3")
+mixed2
+mixed3 <- c(c(TRUE, FALSE, FALSE, TRUE, 4, 0), "3")
+mixed3
+
+```
+
+### (a)
+
+The results for mixed2 and mixed3 are different because they are grouped differently using the c() function. In mixed2, logical, numeric, and character are all combined, and because of the mode hierarchy, the logical values are coerced into character values and the numeric values are coerced into character as well. This is because character is in a way more powerful than the logical and numeric values. However, in mixed3, the c() function groups the first 6 values without the last character 3. First, in the inner c() function, the logical values are combined with the numeric values. Since numeric > logical according to the mode hierarchy, the logical values are coerced into numeric values. Next, we look at the outer c() function where the numeric values are coerced into the character value. Mixed3 outputs 1 and 0 instead of TRUE and FALSE because the logical values were first coerced into numeric values before being coerced to character values.
+
+### (b)
+
+```{r Question 1b}
+c("TRUE", "FALSE", c(FALSE, TRUE, 4, 0, 3))
+```
+
+## Question 2
+
+```{r}
+as.numeric(mixed2)
+as.numeric(mixed3)
+as.logical(mixed2)
+as.logical(mixed3)
+```
+
+### (a)
+
+The command as.numeric(mixed2) produces four NA values for the character "TRUE" and "FALSE" and on the other hand, as.numeric(mixed3) outputs 1 and 0 for the values that were NA in as.numeric(mixed2). This is because the TRUE and FALSE in mixed2 are characters so they must go through 2 processes of 1. turning them into logical and then 2. turning the logical values into numeric. The TRUE and FALSE values will coerce into 1 and 0 correspondingly if they are logical values, but since they are logical values that are coerced to character values, R must take two reverse processes which cannot be expressed through the as.numeric() function. On the other hand, in mixed3, the TRUE and FALSE values are vharacter values that have initially been  coerced into numeric values of 1 and 0. Thus, the as.numeric() function can easily cast the character values into numeric values through dropping the quotation mark.  
+
+### (b)
+
+Similar to part (a) the difference is between "TRUE" and "FALSE" and "1" and "0". It is easier to think that these casting function including as.logical() function can only perform one reverse process on these values. For "TRUE" and "FALSE" the function can simply drop the quotation marks and the values are already in logical values. However, "1" and "0" are still 1 and 0 after the quotation marks are dropped and one more process of convertin 1 into TRUE and 0 into FALSE must be done to cast them into logical. Thus, as.logical(mixed3) outputs all NA values because multiple processes cannot be made through this casting function. In fact, it is possible to cast the numbers into TRUE and FALSE using the as.logical() function if they are numeric values, however in this case, the "1" "0" "4" and "3" are all character values so R outputted NA.  
+
+### (c)
+
+```{r Question 2c}
+as.logical( as.numeric(mixed3) )
+```
+
+## Question 3
+
+### (a)
+
+```{r Question 3a}
+#(i) 
+seq(1, 25)
+
+#(ii) 
+1:25
+
+#(iii) 
+seq_len(25)
+
+#(iv) 
+seq_along(c(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25))
+```
+
+### (b)
+
+```{r Question 3b}
+#(i)
+seq(8, 2, by = -0.5)
+
+#(ii)
+rep(c(-1, 0, 3, 5), 5)
+
+#(iii)
+rep(5:1, 5)
+
+#(iv)
+rep(c(5, 4, 3, 2, 1), c(5, 5, 5, 5, 5))
+
+#(v)
+rep(c(10, 9, 8, 7, 6), c(1, 2, 3, 4, 5))
+```
+
+### (c)
+
+This sequence cannot be generated using only the seq() and rep() functions because this sequence does not just chronologically count time nor repeat. The numbers decrease by 1 for five numbers and the 6th number is the 5th number plus 4 and the numbers decrease by 1 for the next four numbers and the 11th number is the 10th number plus 4 and the pattern continues. It is not just a repetition nor has a fixed pattern between each number so a combination of both functions must be used. 
+
+```{r Question 3c}
+(rep(seq(10, 6), 5)) - c(rep(0, 5), rep(1, 5), rep(2, 5), rep(3, 5), rep(4, 5) )
+```
+
+
+## Question 4
+```{r Question 4a}
+k <- c(1:100)
+sin(k * pi)
+
+
+```
+
+The output did not match what I would expect mathematically. This is because mathematically, all of these values should be 0. However, none of the values that was outputted was 0. All of the values were very close to 0 because they are around 10 to the negative 14, 15, or 16th powered values. However, this shows that although mathematical calculations and R calculations are fairly similar, they may not be exactly accurate. 
+
+## Question 5
+
+### (a)
+
+```{r Question 5a}
+my_skew <- function (x){
+  n <- length (x)
+  (sqrt(n) * sum((x - mean(x))^3)) / (sum((x - mean(x))^2))^(3 / 2)
+}
+```
+
+### (b)
+
+```{r Question 5b}
+running_times <- c(51, 40, 57, 34, 47, 50, 50, 56, 41, 38)
+my_skew (running_times)
+```
+
+The distribution of the sample of Chris Traeger's running times differs from symmetry by `r my_skew(running_times)`.
+
+### (c)
+
+```{r Question 5c}
+my_skew_one <- function (x) {
+  n <- length(x)
+  (sqrt(n) * (sum(x^3) - (3 * mean(x) * sum(x^2)) + 2 * n * mean(x)^3)) / ((sum(x^2) - n * mean(x)^2)^(3 / 2))
+}
+
+my_skew_one (running_times)
+```
+
+Skew obtained from formula in part (c) = `r my_skew_one (running_times)`.
+Skew obtained from formula in part (b) = `r my_skew(running_times)`. 
+
+### (d)
+
+```{r Question 5d}
+uhoh <- running_times * 1e10
+my_skew(uhoh)
+my_skew_one(uhoh)
+```
+
+The skew obtained in part d using both function is exactly the same as the skew that we obtained in part b and part c. This intuitively and mathematically makes sense because the skewness remains the same if we collectively move all the values in a vector by the same amount, in this case multiply by 1e10. Unlike the example that we did during class where we added all the values by a certain amount, we will not have a catastrophic loss of precision for the one-pass formula because in this problem, we are multiplying all the values instead of adding.
+
+### (e)
+
+```{r Question 5e}
+my_skew(running_times) - my_skew_one(running_times)
+typeof(my_skew_one(running_times))
+```
+
+The difference is not identically 0 although the difference is vary close to 0 (`r my_skew(running_times) - my_skew_one(running_times)`) because R utilizes binary number systems and my_skew_one(running_times) cannot be represented as exact floating point and thus, the number becomes an approximation. In other words, the leading values are exactly represented, but the values towards the lower ends cannot be exactly represented, so there is going to be a small remainder that occurs from approximation.
+
+## Question 6
+
+### (a)
+
+```{r Question 6a}
+my_length <- function(x){
+  y <- seq_along(x)
+  y [] <- 1
+  sum (y)
+}
+
+```
+
+### (b)
+
+```{r Question 6b}
+length(numeric(0))
+my_length(numeric(0))
+
+length(seq(1, 99, by = 2))
+my_length( seq(1, 99, by = 2) )
+
+length(c("friends", "waffles", "work"))
+my_length(c("friends", "waffles", "work"))
+
+```
+
+## Question 7
+
+### (a)
+
+```{r Question 7a}
+my_rev <- function (x) {
+  x [my_length (x):0]
+}
+```
+
+### (b)
+
+```{r Question 7b}
+rev(numeric(0))
+my_rev(numeric(0))
+
+rev(seq(1, 99, by = 2))
+my_rev(seq(1, 99, by = 2))
+
+rev(c("friends", "waffles", "work"))
+my_rev(c("friends", "waffles", "work"))
+```
+
+## Question 8
+
+### (a)
+
+```{r Question 8a}
+front <- function(x, n) {
+  length <- length(x)
+  y <- c(length, n)
+  x [0:min(y)]
+}
+
+front(numeric(0), 6)
+front(seq(1, 99, by = 2), 6)
+front(c("friends", "waffles", "work"), 6)
+```
+
+### (b)
+
+```{r Question 8b}
+back <- function(x, n) {
+  length <- length(x)
+  len <- length + 1
+  y <- c(len, n)
+  
+  x [(max(y) - n ): length]
+
+}
+
+back(numeric(0), 6)
+back(seq(1, 99, by = 2), 6)
+back(c("friends", "waffles", "work"), 6)
+
+
+```
+
+### (c)
+
+```{r Question 8c}
+insert_at <- function (x, value, at) {
+  beginning <- front(x, at - 1)
+  ending <- back(x, length(x) + 1 - at)
+  new_vec <- c(beginning, value, ending)
+  new_vec
+}
+```
+
+### (d)
+
+```{r Question 8d}
+insert_at(1:5, c(0, 0, 0), at = 1)
+insert_at(1:5, c(0, 0, 0), at = 3)
+insert_at(1:5, c(0, 0, 0), at = 5)
+insert_at(1:5, c(0, 0, 0), at = 6)
+```

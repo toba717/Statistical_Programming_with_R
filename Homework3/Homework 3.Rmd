@@ -1,0 +1,377 @@
+---
+title: "Stats 20, 21F -- Homework 3"
+author: "TAKAO OBA -- 205615894"
+date: "`r format(Sys.Date(), '%D')`"
+output:
+  html_document:
+    toc: yes            # creates table of contents
+    toc_depth: 4        # toc will include headers <= ####
+    toc_float: yes      # toc always on left of page
+    code_folding: show  # allows hiding of code
+---
+
+## Question 1
+
+### (a)
+
+```{r Question 1a}
+commute_times <- c(14, 12, 20, 19, 15, 20, 28, 20, 20, 18)
+
+which (commute_times > (mean(commute_times) + sd(commute_times)) | commute_times < (mean(commute_times) - sd(commute_times)))
+
+
+commute_times[(commute_times > (mean(commute_times) + sd(commute_times))) | (commute_times < (mean(commute_times) - sd(commute_times)))]
+```
+
+The days Andy had a commute time that was more than one standard deviation away from the average commute time were days `r which (commute_times > (mean(commute_times) + sd(commute_times)) | commute_times < (mean(commute_times) - sd(commute_times)))`.
+
+During these days, the commute times were `r commute_times[(commute_times > (mean(commute_times) + sd(commute_times))) | (commute_times < (mean(commute_times) - sd(commute_times)))]` minutes.
+
+### (b)
+
+```{r Question 1b}
+which (commute_times < (mean(commute_times) + sd(commute_times)) & commute_times > (mean(commute_times) - sd(commute_times)))
+
+commute_times[(commute_times < (mean(commute_times) + sd(commute_times))) & (commute_times > (mean(commute_times) - sd(commute_times)))]
+```
+
+The days Andy had a commute time that was within one standard deviation were days `r which (commute_times < (mean(commute_times) + sd(commute_times)) & commute_times > (mean(commute_times) - sd(commute_times)))`.
+
+During these days, the commute times were `r commute_times[(commute_times < (mean(commute_times) + sd(commute_times))) & (commute_times > (mean(commute_times) - sd(commute_times)))]` minutes. 
+
+### (c)
+
+```{r Question 1c}
+numerator <- length (which (commute_times < (mean(commute_times) + sd(commute_times)) & commute_times > (mean(commute_times) - sd(commute_times))))
+
+denominator <- length (commute_times)
+
+proportion <- (numerator / denominator)
+
+proportion
+
+```
+
+The proportion of days that Andy had a commute time that was within one standard deviation of the mean commute time is `r proportion`.
+
+When arithmetic operators and functions are performed on logical vectors, R converts the logical values into numeric values first, and then does the arithmetic operations.
+
+## Question 2
+
+```{r Question 2}
+NA & TRUE
+NA & FALSE
+NA | TRUE
+NA | FALSE
+```
+
+The output for "NA & FALSE" is FALSE since NA is interpreted as "unknown" and no matter what logical value NA is, since the logical operator is an "&" the output will be always be FALSE because there is already one FALSE value so there is no way for the expressions to be simultaneously TRUE. Additionally, "NA | TRUE" outputs TRUE because this is a logical operator or "|" where the output is TRUE if at least one expression is TRUE and there is already one TRUE expression meaning the output will guaranteed be TRUE. On the contrary, the outputs for "NA & TRUE" and "NA | FALSE" outputs NA because as stated before, NA is interpreted as unknown and thus the output of "NA & TRUE" can possibly be either TRUE or FALSE depending on what NA actually is. Similarly, the output of "NA | FALSE" can possibly be either TRUE or FALSE depending on what NA actually is and thus outputs NA. R cannot output a guaranteed TRUE or FALSE value if the only given information is one FALSE expression in an "or operator"and also if the only given information is one TRUE expression in an "and operator." 
+
+## Question 3
+
+
+```{r Question 3 background} 
+get_minimum_coins <- function (cents) {
+  quarter <- cents %/% 25
+  dime <- (cents %% 25) %/% 10
+  nickel <- ((cents %% 25) %% 10) %/% 5
+  penny <- (((cents %% 25) %% 10) %% 5) %/% 1
+  total <- quarter + dime + nickel + penny
+  total  
+}
+```
+
+### (a)
+
+Yes, the "get_minimum_coins()" function is vectorized. To determine if a function is vectorized or not, we can input a vector for the variable, so in this case "cents" and look at the output and see if the relational operator is actually applied to each item of the vector individually. When we input the vector "coins" which has the elements, "c(10, 23, 34, 45, 65, 78)" we can see how the output is "1 5 6 3 4 6" meaning that the operation was done on each individual item, proving that this function is vectorized. If this was not a vectorized function, the output would have been a single value. 
+
+```{r Question 3a}
+coins <- c(10, 23, 34, 45, 65, 78)
+get_minimum_coins(coins)
+```
+
+### (b)
+
+```{r Question 3b}
+which(get_minimum_coins(1:100) == max(get_minimum_coins(1:100)))
+```
+
+## Question 4
+
+### (a)
+
+```{r Question 4a}
+my_min <- function(x, na.rm = FALSE) {
+  if (na.rm == TRUE) {
+    x <- x[!is.na(x)]
+  }
+  
+  if(sum(as.numeric(is.na(x))) > 0){
+    
+    message("NA")
+    
+  }else if(length(x) == 0){
+    
+    message("Warning in min() : no non-missing arguments to min; returning Inf")
+    message("Inf")
+    
+  }else if(length(x) > 0){
+    
+  min <- x[1]
+  for(n in seq_along(x)) {
+    if(x[n] < min) {
+      min <- x[n]
+      
+    }
+  }
+
+  min
+ }
+}
+```
+
+### (b)
+
+```{r Question 4b}
+my_min(c(4, 1, 0, 2, -3, -5, -4))
+
+my_min(c("bears", "beets", "Battlestar Galactica"))
+
+my_min(7)
+
+my_min(c("Pawnee", "rules", "Eagleton", NA), na.rm = TRUE)
+my_min(c("Pawnee", "rules", "Eagleton", NA), na.rm = FALSE)
+
+my_min(NA, na.rm = TRUE)
+my_min(NA, na.rm = FALSE)
+
+```
+
+
+## Question 5
+
+### (a)
+
+```{r Question 5a}
+fib1 <- 1
+fib2 <- 1
+full_fib <- c(fib1, fib2)
+
+while (fib1 + fib2 < 500) {
+  fib2 <- fib1 + fib2
+  fib1 <- fib2 - fib1
+  full_fib <- c(full_fib, fib2)
+}
+
+full_fib
+
+```
+
+### (b)
+
+```{r Question 5b}
+full_fib <- c(1, 1)
+
+while ((full_fib[length(full_fib)] + full_fib[length(full_fib) - 1]) < 500) {
+  full_fib <- c(full_fib, full_fib[length(full_fib)] + full_fib[length(full_fib) - 1])
+  
+}
+
+full_fib
+```
+
+### (c)
+
+```{r Question 5c}
+full_fib <- c(1, 1)
+
+while ((full_fib[length(full_fib)] + full_fib[length(full_fib) - 1]) < 1000000000) {
+  full_fib <- c(full_fib, full_fib[length(full_fib)] + full_fib[length(full_fib) - 1])
+  
+}
+
+full_fib
+```
+
+My answer is `r full_fib`
+
+## Question 6
+
+```{r Question 6}
+jerry <- 2:(((8 * 5) %% 3)^-2:(7 > 2))
+jerry
+
+ 
+
+# ((8 * 5) %% 3)
+#      1
+# 2:((8 * 5) %% (3^-2))
+# 2: ((8 * 5) %% (3^-2): 1)
+# 
+# 
+# 5 %% (3^-(2:7 > 2))
+# (2:1)^ (-(2:7 > 2))
+# 2:1^-2:1
+# #              1
+```
+
+## Question 7
+
+### (a)
+
+```{r Question 7a}
+my_ifelse <- function(test, yes, no){
+
+  var <- numeric(length(test))
+
+  var[test] <- yes[test] 
+  var[!test] <- no[!test]
+  
+  var
+}
+```
+
+### (b)
+
+```{r Question 7b}
+x <- (1:10) * pi
+my_ifelse(x %% 1 >= 0.5, x %/% 1 + 1, x %/% 1)
+```
+
+### (c)
+
+```{r Question 7c}
+my_abs <- function(x){
+  my_ifelse(x < 0, x * -1, x)
+}
+
+my_sign <- function(x){
+  my_ifelse(x != 0, my_abs(x) / (x), 0)
+}
+
+my_abs(c(1, -3, 4, 5, -5))
+abs(c(1, -3, 4, 5, -5))
+my_sign(c(1, -3, -4, 8, 9, -11, 2))
+sign(c(1, -3, -4, 8, 9, -11, 2))
+```
+
+
+## Question 8
+
+### (a)
+
+```{r Question 8a}
+merge <- function(left, right){
+  merged <- numeric(0)
+  
+  while(length(left) > 0) {
+    if(length(right) > 0){
+      if(left[1] < right[1]){
+        merged <- c(merged, left[1])
+        left <- left[-1]
+      }else{
+        merged <- c(merged, right[1])
+        right <- right[-1]
+      }
+    }else{
+      merged <- c(merged, left)
+      left <- numeric(0)
+    }
+  }
+  c(merged, right)
+}
+
+merge_sort <- function(x){
+  if(length(x) > 1){
+    if((length(x) %% 2) == 0){
+      left <- x[1:(length(x) / 2)]
+      right <- x[((length(x) / 2) + 1):length(x)]
+
+    }else if((length(x) %% 2) == 1){
+      left <- x[1:(length(x) / 2)]
+      right <- x[((length(x) / 2) + 1):(length(x) + 1)]
+    }
+    
+    sorted_left <- merge_sort(left)
+    sorted_right <- merge_sort(right)
+    x <- merge(sorted_left, sorted_right)
+  }
+  x
+}
+
+
+
+```
+
+### (b)
+
+```{r Question 8b}
+merge_sort(numeric(0))
+merge_sort(7)
+merge_sort(10:1)
+
+```
+
+## Question 9
+
+```{r Question 9 background}
+setwd("~/Desktop")
+load("dna.RData")
+```
+
+### (a)
+
+```{r Question 9a}
+locate_motif <- function(strand, motif){
+  len <- length(motif)
+  whichn <- integer(0)
+  
+  for(i in seq_along(strand)){
+    condition <- which(strand[i: (i - 1 + len)] == motif)
+    
+    if (length(condition) == length(motif)){
+      
+      whichn <- i
+      
+      }
+    }
+
+  whichn
+}
+
+
+locate_motif(dna1, c("G", "A", "T", "T", "A", "C", "A"))
+
+```
+
+### (b)
+
+```{r Question 9b}
+seq1 <- c("A", "C", "A", "G", "T")
+seq2 <- c("T", "A", "G", "T", "A")
+
+# extract_longest_substring <- function(strand1, strand2){
+#   ch <- character(0)
+# 
+  # for(i in seq_along(strand1)){
+  #   locate_motif(strand1, strand2)
+  #   if(locate_motif(strand1, strand2) == integer(0)){
+  #     strand2[-1]
+  #   }
+  # }
+#   
+#   for(i in seq_along(strand1)){
+#     locate_motif(strand1, strand2)
+#     if(locate_motif(strand1, strand2) == integer(0)){
+#       strand2[-length(strand2)]
+#     }
+#   }
+# 
+#   ch
+# }
+
+
+# ???
+
+
+```
